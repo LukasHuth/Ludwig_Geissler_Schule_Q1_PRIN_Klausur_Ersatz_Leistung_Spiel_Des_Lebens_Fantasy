@@ -9,4 +9,5 @@ public class Player {
     public void move(int steps) {}
     public void addMoney(int money) {}
     public void changeClass(PlayerClass playerClass) {}
+    public Player(String name) {this.name = name;}
 }
