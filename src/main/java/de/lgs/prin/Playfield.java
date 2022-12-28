@@ -12,4 +12,8 @@ public class Playfield {
     }
     public void addField(Field field, double position) {}
     public void generateFields() {}
+    public boolean isFinished(Player player) { return true; }
+    public Field getField(double pos) {
+        return this.playfield.get(pos);
+    }
 }
