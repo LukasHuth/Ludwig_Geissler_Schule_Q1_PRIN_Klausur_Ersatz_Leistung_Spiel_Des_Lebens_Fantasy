@@ -10,5 +10,11 @@ public class Main {
         String name = "test";
         System.out.printf("Der Zug von %s ist nun beendet\n", name);
         System.out.println("test");
+        GameController c = new GameController(3);
+        c.initialize();
+        c.run();
+        c.run();
+        System.out.println(c.isPaused());
+        System.out.println(c.isFinished());
     }
 }

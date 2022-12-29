@@ -31,7 +31,7 @@ public class GameController {
     private void createPlayer()
     {
         Scanner scanner = new Scanner(System.in);
-        System.out.println("Was ist dein name?");
+        System.out.println("What is your name?");
         String name = scanner.nextLine();
         addPlayer(new Player(name, this));
     }
@@ -68,34 +68,39 @@ public class GameController {
     }
     public void run()
     {
+        Scanner scanner = new Scanner(System.in);
         for(int i = 0; i < this.playerCount; i++)
         {
             Player player = this.players.get(i);
             String name = player.getName();
-            System.out.printf("%s is jetzt an der Reihe!", name);
+            System.out.printf("It's now the turn of %s!\n", name);
             Random random = new Random();
-            int number = random.nextInt(11);
-            System.out.printf("Es wurde eine %d gewürfelt!\n", number);
+            int number = random.nextInt(10)+1;
+            System.out.printf("A %d has been rolled!\n", number);
             player.move(number);
             executeField(player);
-            System.out.printf("Der Zug von %s ist nun beendet\n", name);
+            System.out.printf("The turn of %s is now finished\n", name);
+            scanner.nextLine();
         }
-        System.out.println("Bist du bereit oder möchtest du eine Pause einlegen? (W|p) (w=weiter) (p=Pause)");
-        Scanner scanner = new Scanner(System.in);
+        // Spieler fragen ob er Pausieren möchte oder weiter spielen möchte (c und enter ist weiter und p ist pause) bei falscher eingabe wird die frage wiederhohlt
+        //region
+        System.out.println("Are you ready or do you want to take a break? (C|b) (c=continue) (b=break)");
         String answer;
-        String[] answers = {"w", "p", ""};
+        String[] answers = {"b", "c", ""};
         while(Arrays.stream(answers).noneMatch((answer = scanner.nextLine().toLowerCase())::equals))
         {
             System.out.println("You did not enter the right key!");
-            System.out.println("Bist du bereit oder möchtest du eine Pause einlegen? (W|p) (w=weiter) (p=Pause)");
+            System.out.println("Are you ready or do you want to take a break? (C|b) (c=continue) (b=break)");
         }
+        this.paused = answer.equalsIgnoreCase("b");
+        //endregion
         this.finished = true;
         for(Player p : this.players)
         {
-            if(!this.playfield.isFinished(p))
+            if(!this.playfield.isFinished(p)) {
                 this.finished = false;
+            }
         }
-        this.paused = answer.equalsIgnoreCase("p");
     }
     public boolean isPaused() {return this.paused;}
     public boolean isFinished() {return this.finished;}
