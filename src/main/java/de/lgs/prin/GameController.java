@@ -14,6 +14,7 @@ public class GameController {
     private boolean finished;
     private final ArrayList<Player> players;
     private final int playerCount;
+    private int playersFinished;
 
     public GameController(int playerCount)
     {
@@ -22,6 +23,7 @@ public class GameController {
         this.paused = false;
         this.finished = false;
         this.players = new ArrayList<>();
+        this.playersFinished = 0;
     }
     // initialisiert eine Schleife die so oft läuft wie es Spieler gibt, um die Spieler zu erstellen
     private void createPlayers(int playerCount)
@@ -69,6 +71,10 @@ public class GameController {
     {
         this.playfield.getField(player.getPosition()).executeAction(player);
     }
+    public int getPlayersFinished()
+    {
+        return this.playersFinished;
+    }
     public void run()
     {
         Scanner scanner = new Scanner(System.in);
@@ -87,6 +93,7 @@ public class GameController {
             System.out.printf("A %d has been rolled!\n", number);
             player.move(number);
             executeField(player);
+            if(this.playfield.isFinished(player)) this.playersFinished++;
             System.out.printf("The turn of %s is now finished\n", name);
             scanner.nextLine();
         }
