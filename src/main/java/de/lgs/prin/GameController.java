@@ -1,5 +1,8 @@
 package de.lgs.prin;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
@@ -73,6 +76,11 @@ public class GameController {
         {
             Player player = this.players.get(i);
             String name = player.getName();
+            if(this.playfield.isFinished(player))
+            {
+                System.out.printf("%s is already finished, moving to the next one\n", name);
+                continue;
+            }
             System.out.printf("It's now the turn of %s!\n", name);
             Random random = new Random();
             int number = random.nextInt(10)+1;
@@ -102,6 +110,7 @@ public class GameController {
             }
         }
     }
+    public Player getPlayer(int i) {return this.players.get(i);}
     public boolean isPaused() {return this.paused;}
     public boolean isFinished() {return this.finished;}
     public Playfield getPlayfield() {return this.playfield;}
@@ -111,6 +120,21 @@ public class GameController {
     }
     public void saveGame()
     {
-        // save game
+        JSONObject jo = new JSONObject();
+        jo.put("playersize", this.playerCount);
+        JSONArray playerArray = new JSONArray();
+        for(Player p : this.players)
+        {
+            JSONObject playerObject = new JSONObject();
+            playerObject.put("name", p.getName());
+            playerObject.put("position", p.getPosition());
+            playerObject.put("money", p.getMoney());
+            playerObject.put("groupSize", p.getGroupsize());
+            playerObject.put("playerClass", p.getPlayerClass().name());
+            //PlayerClass c = PlayerClass.valueOf("Advaned_Blacksmith");
+            playerArray.put(playerObject);
+        }
+        jo.put("players", playerArray);
+        System.out.println(jo.toString());
     }
 }
