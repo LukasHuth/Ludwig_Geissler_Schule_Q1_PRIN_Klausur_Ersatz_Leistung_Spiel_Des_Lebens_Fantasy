@@ -14,6 +14,10 @@ public class Main {
         c.initialize();
         c.run();
         c.run();
+        c.getPlayer(0).changeClass(PlayerClass.Advaned_Blacksmith);
+        c.getPlayer(1).changeClass(PlayerClass.Alchemist);
+        c.getPlayer(2).changeClass(PlayerClass.Blacksmith);
+        c.saveGame();
         System.out.println(c.isPaused());
         System.out.println(c.isFinished());
     }

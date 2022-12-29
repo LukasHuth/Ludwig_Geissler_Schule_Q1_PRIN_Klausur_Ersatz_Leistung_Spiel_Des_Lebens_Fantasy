@@ -21,7 +21,7 @@ public class Playfield {
             playfield.put((double)i, new Field(Fieldtype.NONE, i));
         }
     }
-    public boolean isFinished(Player player) { return true; }
+    public boolean isFinished(Player player) { return false; }
     public Field getField(double pos) {
         return this.playfield.get(pos);
     }
