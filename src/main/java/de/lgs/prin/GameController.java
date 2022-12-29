@@ -33,7 +33,7 @@ public class GameController {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Was ist dein name?");
         String name = scanner.nextLine();
-        addPlayer(new Player(name));
+        addPlayer(new Player(name, this));
     }
     // erstellt das spiel mit spielfeld
     public void initialize()
@@ -49,7 +49,7 @@ public class GameController {
         for(int i = 0; i < this.playerCount; i++)
         {
             // spieler laden in p
-            Player p = new Player(""); // placeholder bis das spieler laden implementiert ist
+            Player p = new Player("", this); // placeholder bis das spieler laden implementiert ist
             addPlayer(p);
         }
         int fieldCount = 1; // statt 0 die anzahl der zu ladenden spielfelder
