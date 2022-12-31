@@ -24,4 +24,5 @@ public enum PlayerClass {
     Apprentice_Preacher,
     Preacher,
     Advaned_Preacher,
+    NONE
 }

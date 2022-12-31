@@ -3,6 +3,11 @@ package de.lgs.prin;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
@@ -15,9 +20,15 @@ public class GameController {
     private final ArrayList<Player> players;
     private final int playerCount;
     private int playersFinished;
-
-    public GameController(int playerCount)
+    private long gameid;
+    private Menu menu;
+    public long getGameid() {return this.gameid;}
+    public void setPaused(boolean p) {this.paused = p;}
+    public int getPlayerCount() {return this.playerCount;}
+    public GameController(int playerCount, Menu menu)
     {
+        this.menu = menu;
+        this.gameid = System.currentTimeMillis();
         this.playerCount = playerCount;
         this.playfield = new Playfield();
         this.paused = false;
@@ -48,24 +59,34 @@ public class GameController {
         this.playfield.generateFields();
     }
     // lädt das spiel aus dem data Objekt mit einem noch nicht definiertem Datentypen
-    public void initialize(Object data)
+    public void initialize(JSONObject data)
     {
         // lädt die spieler
+        this.gameid = data.getLong("gameid");
         for(int i = 0; i < this.playerCount; i++)
         {
             // spieler laden in p
-            Player p = new Player("", this); // placeholder bis das spieler laden implementiert ist
+            JSONObject po = data.getJSONArray("players").getJSONObject(i);
+            Player p = new Player(po.getString("name"), this);
+            //System.out.printf("Loading player '%s'\n", p.getName());
+            p.setGroupsize(po.getInt("groupSize"));
+            p.setPosition(po.getDouble("position"));
+            //System.out.printf("Position: %f\n", p.getPosition());
+            p.setMoney(po.getInt("money"));
+            p.setPlayerClass(PlayerClass.valueOf(po.getString("playerClass")));
             addPlayer(p);
         }
-        int fieldCount = 1; // statt 0 die anzahl der zu ladenden spielfelder
+        JSONArray fields = data.getJSONArray("fields");
+        int fieldCount = fields.length(); // statt 1 die anzahl der zu ladenden spielfelder
         for(int i = 0; i < fieldCount; i++)
         {
             // Field laden in field
             // Field position laden in position
             Field field = new Field(Fieldtype.NONE, 0); // placeholder bis das laden des feldes implementiert ist
             double position = 0.0;
-            this.playfield.addField(field, position);
+            this.playfield.addField(field, i);
         }
+        this.playfield.generateFields(); // just for debug till the field load is finished
     }
     private void executeField(Player player)
     {
@@ -77,6 +98,7 @@ public class GameController {
     }
     public void run()
     {
+        //System.out.println("Gameid: "+ this.gameid);
         Scanner scanner = new Scanner(System.in);
         for(int i = 0; i < this.playerCount; i++)
         {
@@ -92,8 +114,8 @@ public class GameController {
             int number = random.nextInt(10)+1;
             System.out.printf("A %d has been rolled!\n", number);
             player.move(number);
-            executeField(player);
             if(this.playfield.isFinished(player)) this.playersFinished++;
+            executeField(player);
             System.out.printf("The turn of %s is now finished\n", name);
             scanner.nextLine();
         }
@@ -116,6 +138,31 @@ public class GameController {
                 this.finished = false;
             }
         }
+        if(this.paused)
+        {
+            for(Player p : this.players)
+            {
+                boolean found = false;
+                for(int i = 0; i < this.menu.getScoreboard().length(); i++)
+                {
+                    JSONObject jo = this.menu.getScoreboard().getJSONObject(i);
+                    //System.out.println(jo.getLong("gameid"));
+                    if(jo.getString("player").equals(p.getName())  && jo.getLong("gameid") == this.gameid)
+                    {
+                        jo.put("score", p.getMoney());
+                        found = true;
+                    }
+                }
+                if(!found)
+                {
+                    JSONObject jo = new JSONObject();
+                    jo.put("player", p.getName());
+                    jo.put("score", p.getMoney());
+                    jo.put("gameid", this.gameid);
+                    this.menu.getScoreboard().put(jo);
+                }
+            }
+        }
     }
     public Player getPlayer(int i) {return this.players.get(i);}
     public boolean isPaused() {return this.paused;}
@@ -132,6 +179,7 @@ public class GameController {
         JSONArray playerArray = new JSONArray();
         for(Player p : this.players)
         {
+            System.out.println(this.players.size() + this.players.get(0).getName());
             JSONObject playerObject = new JSONObject();
             playerObject.put("name", p.getName());
             playerObject.put("position", p.getPosition());
@@ -142,6 +190,19 @@ public class GameController {
             playerArray.put(playerObject);
         }
         jo.put("players", playerArray);
-        System.out.println(jo.toString());
+        //System.out.println(jo.toString());
+        JSONArray fields = new JSONArray();
+        jo.put("fields", fields);
+        jo.put("gameid", this.gameid);
+        File f = new File("data/lastGame.json");
+        if(!f.exists()) try {Files.createFile(f.toPath());} catch(Exception e){}
+        try {
+            BufferedWriter writer = new BufferedWriter(new FileWriter(f.getPath()));
+            writer.write(jo.toString());
+            writer.close();
+        } catch(IOException e)
+        {
+            System.out.println("Could not save the game!");
+        }
     }
 }

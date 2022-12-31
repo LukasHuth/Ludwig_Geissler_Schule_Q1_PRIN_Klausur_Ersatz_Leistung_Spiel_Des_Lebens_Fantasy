@@ -74,6 +74,7 @@ public class Player {
         this.name = name;
         this.gameController = gameController;
         this.groupsize = 1;
+        this.playerClass = PlayerClass.NONE;
     }
     //Methoden
     public void move(int steps) {
