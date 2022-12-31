@@ -137,7 +137,6 @@ public class Menu {
                 this.gameController.run();
             }
         }
-        // TODO: save leaderboard
         File f = new File("data/leaderboard.json");
         if(!f.exists()) try {Files.createFile(f.toPath());} catch(Exception e){}
         try {
