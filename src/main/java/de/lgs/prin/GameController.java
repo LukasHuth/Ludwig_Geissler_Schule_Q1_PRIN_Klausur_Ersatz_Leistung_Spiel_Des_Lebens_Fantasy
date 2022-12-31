@@ -179,7 +179,7 @@ public class GameController {
         JSONArray playerArray = new JSONArray();
         for(Player p : this.players)
         {
-            System.out.println(this.players.size() + this.players.get(0).getName());
+            //System.out.println(this.players.size() + this.players.get(0).getName());
             JSONObject playerObject = new JSONObject();
             playerObject.put("name", p.getName());
             playerObject.put("position", p.getPosition());
