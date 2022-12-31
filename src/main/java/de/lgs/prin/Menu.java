@@ -242,26 +242,8 @@ public class Menu {
                 boolean save = question("Do you want to save the game?", true);
                 if(save)
                     this.gameController.saveGame();
-                else
-                    removePlayersFromScoreboardFromThisRound();
                 this.run = false;
                 break;
-        }
-    }
-    public void removePlayersFromScoreboardFromThisRound()
-    {
-        for(int i = 0; i < this.gameController.getPlayerCount(); i++)
-        {
-            Player p = this.gameController.getPlayer(i);
-            for(int j = 0; j < this.scoreboard.length(); j++)
-            {
-                JSONObject jo = this.scoreboard.getJSONObject(j);
-                if(jo.getString("player").equals(p.getName()) && jo.getLong("gameid") == this.gameController.getGameid())
-                {
-                    this.scoreboard.remove(j);
-                    j--;
-                }
-            }
         }
     }
     private boolean question(String q, boolean def)
