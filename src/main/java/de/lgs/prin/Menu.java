@@ -29,15 +29,13 @@ public class Menu {
     {
         return this.gameController;
     }
-    public void showLeaderboard() throws IOException
+    private void sortLeaderboard(JSONArray data)
     {
-        // Load LeaderBoard in JSONObject
-
-        JSONArray data = this.scoreboard;
         boolean changed = false;
         // dataStructure { "player": String, "score": int, "gameid": long }
         for(int i = 0; i < data.length(); i++)
         {
+            changed = false;
             for(int j = 0; j < data.length()-1; j++)
             {
                 //System.out.println(data.toString());
@@ -54,13 +52,22 @@ public class Menu {
                     String stemp = obj0.getString("player");
                     obj0.put("player", obj1.getString("player"));
                     obj1.put("player", stemp);
+                    changed = true;
                 }
             }
+            if(!changed) break;
         }
+    }
+    public void showLeaderboard() throws IOException
+    {
+        // Load LeaderBoard in JSONObject
+
+        JSONArray data = this.scoreboard;
+        sortLeaderboard(data);
         for(int i = 0; i < Math.min(Menu.scoreboardRows, data.length()); i++)
         {
             JSONObject d = data.getJSONObject(i);
-            System.out.printf("(%d): %s with a score of %d\n", i, d.getString("player"), d.getInt("score"));
+            System.out.printf("(%d): %s with a score of %d\n", i+1, d.getString("player"), d.getInt("score"));
         }
     }
     private JSONObject loadJsonObjectFromFile(String filename)
@@ -81,14 +88,19 @@ public class Menu {
             Path path = Paths.get("data/");
             Path filepath = Paths.get(path+"/"+filename);
             if(!Files.exists(path)) Files.createDirectory(path);
-            File f = new File(filepath.toUri());
+            File f = new File(filepath.toString());
             // create file an ready it for the json read if it doesnt exists
             if(!f.exists())
             {
-                Files.createFile(filepath);
-                BufferedWriter writer = new BufferedWriter(new FileWriter(filepath.toUri().toString()));
-                writer.write(ifEmpty);
-                writer.close();
+                Files.createFile(f.toPath());
+                try {
+                    BufferedWriter writer = new BufferedWriter(new FileWriter(f.getPath()));
+                    writer.write(ifEmpty);
+                    writer.close();
+                } catch(IOException e)
+                {
+                    System.out.printf("Could not Create File '%s'!\n", filename);
+                }
             }
             String fp = filepath.toUri().toString().replace("file:///", "");
             //System.out.println(fp);
@@ -110,7 +122,12 @@ public class Menu {
     }
     public boolean loadGamestate() {
         JSONObject data = loadJsonObjectFromFile("lastGame.json");
-        if(data.keySet().isEmpty()) return false;
+        if(data.keySet().isEmpty())
+        {
+            System.out.println("No game was found new game will be created instead");
+            createNewGame();
+            return false;
+        }
         this.gameController = new GameController(data.getJSONArray("players").length(), this);
         gameController.initialize(data);
         return true;
@@ -137,6 +154,10 @@ public class Menu {
                 this.gameController.run();
             }
         }
+        saveLeaderboard();
+    }
+    private void saveLeaderboard()
+    {
         File f = new File("data/leaderboard.json");
         if(!f.exists()) try {Files.createFile(f.toPath());} catch(Exception e){}
         try {
@@ -192,8 +213,8 @@ public class Menu {
     }
     private void chooseMiddle()
     {
-        System.out.printf("Hello, to %s\nwhat do you want to do?\n(1) Show Rules\n(2) Show Leaderboard\n(3) Continue\n(4) Exit\n", gamename);
-        int choice = getChoice(1,4);
+        System.out.printf("Hello, to %s\nwhat do you want to do?\n(1) Show Rules\n(2) Show Leaderboard\n(3) Continue\n(4) Save Current Game\n(5) New Game\n(6) Exit\n", gamename);
+        int choice = getChoice(1,6);
         switch(choice)
         {
             case 1:
@@ -207,9 +228,48 @@ public class Menu {
                 break;
             case 4:
                 this.gameController.saveGame();
+                break;
+            case 5:
+                boolean overwrite = question("Do you really want to create a new game, the old one will be overwritten?", false);
+                if(overwrite)
+                {
+                    createNewGame();
+                    this.gameController.setPaused(false);
+                } else
+                    System.out.println("Cancled");
+                break;
+            case 6:
+                boolean save = question("Do you want to save the game?", true);
+                if(save)
+                    this.gameController.saveGame();
+                else
+                    removePlayersFromScoreboardFromThisRound();
                 this.run = false;
                 break;
         }
+    }
+    public void removePlayersFromScoreboardFromThisRound()
+    {
+        for(int i = 0; i < this.gameController.getPlayerCount(); i++)
+        {
+            Player p = this.gameController.getPlayer(i);
+            for(int j = 0; j < this.scoreboard.length(); j++)
+            {
+                JSONObject jo = this.scoreboard.getJSONObject(j);
+                if(jo.getString("player").equals(p.getName()) && jo.getLong("gameid") == this.gameController.getGameid())
+                {
+                    this.scoreboard.remove(j);
+                    j--;
+                }
+            }
+        }
+    }
+    private boolean question(String q, boolean def)
+    {
+        System.out.println(q + " " + ((def) ? "(Y|n)" : "(y|N)"));
+        Scanner sc = new Scanner(System.in);
+        boolean a = sc.nextLine().equalsIgnoreCase((def) ? "n" : "y");
+        return def != a;
     }
     private void chooseEnd()
     {
