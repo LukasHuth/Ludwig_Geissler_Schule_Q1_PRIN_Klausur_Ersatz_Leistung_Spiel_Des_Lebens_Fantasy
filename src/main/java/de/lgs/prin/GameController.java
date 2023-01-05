@@ -8,10 +8,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Random;
-import java.util.Scanner;
+import java.util.*;
 
 public class GameController {
     private final Playfield playfield;
@@ -56,7 +53,7 @@ public class GameController {
     {
         // erstellt die spieler
         createPlayers(this.playerCount);
-        this.playfield.generateFields();
+        this.playfield.generateMap();
     }
     // lädt das spiel aus dem data Objekt mit einem noch nicht definiertem Datentypen
     public void initialize(JSONObject data)
@@ -78,15 +75,17 @@ public class GameController {
         }
         JSONArray fields = data.getJSONArray("fields");
         int fieldCount = fields.length(); // statt 1 die anzahl der zu ladenden spielfelder
+        HashMap<Double, Field> flds = new HashMap<>();
         for(int i = 0; i < fieldCount; i++)
         {
             // Field laden in field
             // Field position laden in position
             Field field = new Field(Fieldtype.NONE, 0); // placeholder bis das laden des feldes implementiert ist
             double position = 0.0;
-            this.playfield.addField(field, i);
+            flds.put((double)i, field);
         }
-        this.playfield.generateFields(); // just for debug till the field load is finished
+        this.playfield.generateMap(); // just for debug till the field load is finished
+        // this.playfield.setPlayfield(flds); // commented out till i implemented the field load method
     }
     private void executeField(Player player)
     {

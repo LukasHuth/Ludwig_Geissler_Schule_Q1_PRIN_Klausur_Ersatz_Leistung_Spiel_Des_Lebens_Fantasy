@@ -78,7 +78,7 @@ public class Player {
     }
     //Methoden
     public void move(int steps) {
-        double n = this.gameController.getPlayfield().nextSplitfield(this.position);
+        double n = this.gameController.getPlayfield().nextPause(this.position);
         if (n < steps) {
             this.position += n;
             return;

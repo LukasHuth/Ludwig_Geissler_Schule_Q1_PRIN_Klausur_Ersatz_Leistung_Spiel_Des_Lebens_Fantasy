@@ -87,6 +87,7 @@ public class Menu {
         {
             Path path = Paths.get("data/");
             Path filepath = Paths.get(path+"/"+filename);
+            System.out.println(filepath.toUri().toString());
             if(!Files.exists(path)) Files.createDirectory(path);
             File f = new File(filepath.toString());
             // create file an ready it for the json read if it doesnt exists

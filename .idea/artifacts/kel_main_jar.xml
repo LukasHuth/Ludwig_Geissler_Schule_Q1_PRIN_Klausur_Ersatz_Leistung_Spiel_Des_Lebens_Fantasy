@@ -1,0 +1,9 @@
+<component name="ArtifactManager">
+  <artifact type="jar" build-on-make="true" name="kel.main:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/kel_main_jar</output-path>
+    <root id="archive" name="kel.main.jar">
+      <element id="module-output" name="kel.main" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.json/json/20220924/5aa95e7688f76c664af205c5937620f02688dfbc/json-20220924.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>
