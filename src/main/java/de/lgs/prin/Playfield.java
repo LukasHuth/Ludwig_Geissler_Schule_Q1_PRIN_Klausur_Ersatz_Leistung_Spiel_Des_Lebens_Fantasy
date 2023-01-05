@@ -21,32 +21,32 @@ public class Playfield {
         playfield.put(0.0, new Field(Fieldtype.START, 0));
         for (double i=1;i<=50;i++){
             if(i<=8){
-                playfield.put(i,new Field(randField(), 0));
-                playfield.put(i+0.1,new Field(randField(), 0));
+                playfield.put(i,new Field(randField(), (int)i));
+                playfield.put(i+0.1,new Field(randField(), (int)i));
             } else if (i==9) {
-                playfield.put(i,new Field(Fieldtype.SPLIT, 0));
+                playfield.put(i,new Field(Fieldtype.SPLIT, (int)i));
             } else if (i<=18) {
-                playfield.put(i,new Field(randField(), 0));
+                playfield.put(i,new Field(randField(), (int)i));
             } else if (i==19) {
-                playfield.put(i,new Field(Fieldtype.GILDE, 0));
+                playfield.put(i,new Field(Fieldtype.GILDE, (int)i));
             } else if (i<=23) {
-                playfield.put(i,new Field(randField(), 0));
+                playfield.put(i,new Field(randField(), (int)i));
             } else if (i==24) {
-                playfield.put(i,new Field(Fieldtype.SPLIT, 0));
+                playfield.put(i,new Field(Fieldtype.SPLIT, (int)i));
             } else if (i<=36) {
-                playfield.put(i,new Field(randField(), 0));
-                playfield.put(i+0.1,new Field(randField(), 0));
+                playfield.put(i,new Field(randField(), (int)i));
+                playfield.put(i+0.1,new Field(randField(), (int)i));
             } else if (i<=41) {
-                playfield.put(i,new Field(randField(), 0));
+                playfield.put(i,new Field(randField(), (int)i));
             } else if (i==42) {
-                playfield.put(i, new Field(Fieldtype.SPLIT, 0));
+                playfield.put(i, new Field(Fieldtype.SPLIT, (int)i));
             } else if (i<=52) {
-                playfield.put(i,new Field(randField(), 0));
-                playfield.put(i+0.1,new Field(randField(), 0));
+                playfield.put(i,new Field(randField(), (int)i));
+                playfield.put(i+0.1,new Field(randField(), (int)i));
             } else if (i<70) {
-                playfield.put(i,new Field(randField(), 0));
+                playfield.put(i,new Field(randField(), (int)i));
             } else if (i==70) {
-                playfield.put(i, new Field(Fieldtype.ZIEL, 0));
+                playfield.put(i, new Field(Fieldtype.ZIEL, (int)i));
             }
         }
     }

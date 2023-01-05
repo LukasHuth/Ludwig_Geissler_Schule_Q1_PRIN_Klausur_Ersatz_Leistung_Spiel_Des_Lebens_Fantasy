@@ -87,15 +87,15 @@ public class Menu {
         {
             Path path = Paths.get("data/");
             Path filepath = Paths.get(path+"/"+filename);
-            System.out.println(filepath.toUri().toString());
             if(!Files.exists(path)) Files.createDirectory(path);
-            File f = new File(filepath.toString());
+            String fp = filepath.toString();
+            File f = new File(fp);
             // create file an ready it for the json read if it doesnt exists
             if(!f.exists())
             {
                 Files.createFile(f.toPath());
                 try {
-                    BufferedWriter writer = new BufferedWriter(new FileWriter(f.getPath()));
+                    BufferedWriter writer = new BufferedWriter(new FileWriter(fp));
                     writer.write(ifEmpty);
                     writer.close();
                 } catch(IOException e)
@@ -103,8 +103,6 @@ public class Menu {
                     System.out.printf("Could not Create File '%s'!\n", filename);
                 }
             }
-            String fp = filepath.toUri().toString().replace("file:///", "");
-            //System.out.println(fp);
             InputStream stream = new FileInputStream(fp);
             byte[] dt = stream.readAllBytes();
             StringBuilder sb = new StringBuilder();
@@ -112,9 +110,8 @@ public class Menu {
             {
                 sb.append((char)dt[i]);
             }
-            String jsonText = sb.toString();
             // System.out.println(jsonText);
-            return jsonText;
+            return sb.toString();
         } catch(IOException e)
         {
             System.out.printf("File '%s' could not be opened", filename);
