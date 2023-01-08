@@ -17,13 +17,17 @@ public class GameController {
     private final ArrayList<Player> players;
     private final int playerCount;
     private int playersFinished;
+    private static int finishedPlayers = 0;
+    public static int getFinishedPlayers() {return finishedPlayers;}
     private long gameid;
     private Menu menu;
     public long getGameid() {return this.gameid;}
     public void setPaused(boolean p) {this.paused = p;}
     public int getPlayerCount() {return this.playerCount;}
+    private boolean firstrun;
     public GameController(int playerCount, Menu menu)
     {
+        this.firstrun = true;
         this.menu = menu;
         this.gameid = System.currentTimeMillis();
         this.playerCount = playerCount;
@@ -32,6 +36,7 @@ public class GameController {
         this.finished = false;
         this.players = new ArrayList<>();
         this.playersFinished = 0;
+        GameController.finishedPlayers = this.playersFinished;
     }
     // initialisiert eine Schleife die so oft läuft wie es Spieler gibt, um die Spieler zu erstellen
     private void createPlayers(int playerCount)
@@ -80,7 +85,7 @@ public class GameController {
         {
             // Field laden in field
             // Field position laden in position
-            Field field = new Field(Fieldtype.NONE, 0); // placeholder bis das laden des feldes implementiert ist
+            Field field = new Field(Fieldtype.NONE, 0, this.playfield); // placeholder bis das laden des feldes implementiert ist
             double position = 0.0;
             flds.put((double)i, field);
         }
@@ -97,6 +102,12 @@ public class GameController {
     }
     public void run()
     {
+        if(this.firstrun)
+        {
+            System.out.println("Welcome to a world full of magic and fantasy, a world that has long been forgotten and you are the only ones who know of its existence.\n" +
+                    "Now find out who will be the first to start writing the path of his life.");
+            Collections.shuffle(this.players);
+        }
         //System.out.println("Gameid: "+ this.gameid);
         Scanner scanner = new Scanner(System.in);
         for(int i = 0; i < this.playerCount; i++)
@@ -110,10 +121,17 @@ public class GameController {
             }
             System.out.printf("It's now the turn of %s!\n", name);
             Random random = new Random();
-            int number = random.nextInt(10)+1;
-            System.out.printf("A %d has been rolled!\n", number);
-            player.move(number);
-            if(this.playfield.isFinished(player)) this.playersFinished++;
+            if(!this.firstrun)
+            {
+                int number = random.nextInt(10)+1;
+                System.out.printf("A %d has been rolled!\n", number);
+                player.move(number);
+            }
+            if(this.playfield.isFinished(player))
+            {
+                this.playersFinished++;
+                GameController.finishedPlayers = this.playersFinished;
+            }
             executeField(player);
             System.out.printf("The turn of %s is now finished\n", name);
             scanner.nextLine();
@@ -162,6 +180,7 @@ public class GameController {
                 }
             }
         }
+        this.firstrun = false;
     }
     public Player getPlayer(int i) {return this.players.get(i);}
     public boolean isPaused() {return this.paused;}

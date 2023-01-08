@@ -7,9 +7,9 @@ public enum Fieldtype {
     SPLIT,
     START,
     GILDE,
-    ZIEL,
     JOBWAHL,
     JOINGROUP,
     KID,
+    Finish,
     NONE
 }

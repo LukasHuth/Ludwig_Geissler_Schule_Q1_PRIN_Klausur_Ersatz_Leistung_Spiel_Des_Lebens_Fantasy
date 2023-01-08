@@ -8,6 +8,7 @@ public class Player {
     private int money;
     private int groupsize;
     private GameController gameController;
+    private double moneyScale;
 
 
     //Getter & Setter
@@ -65,19 +66,29 @@ public class Player {
         this.gameController = gameController;
     }
 
+    public double getMoneyScale()
+    {
+        return this.moneyScale;
+    }
+
+    public void setMoneyScale(double scale)
+    {
+        this.moneyScale = scale;
+    }
 
     //constructor
     public Player () {
     }
 
     public Player (String name, GameController gameController) {
+        this.moneyScale = 1;
         this.name = name;
         this.gameController = gameController;
         this.groupsize = 1;
         this.playerClass = PlayerClass.NONE;
     }
     //Methoden
-    public void move(int steps) {
+    public void move(double steps) {
         double n = this.gameController.getPlayfield().nextPause(this.position);
         if (n < steps) {
             this.position += n;

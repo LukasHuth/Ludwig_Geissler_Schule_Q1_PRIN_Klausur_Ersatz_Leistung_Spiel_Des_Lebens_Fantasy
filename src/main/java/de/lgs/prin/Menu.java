@@ -2,66 +2,39 @@ package de.lgs.prin;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.json.JSONWriter;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.sql.SQLOutput;
-import java.util.Arrays;
 import java.util.Scanner;
 
 public class Menu {
+    //region Attributes
     private GameController gameController;
-    private String rules;
-    private JSONArray scoreboard;
+    private static final String rules = "";
+    private final JSONArray scoreboard;
     private boolean run;
     private static final int scoreboardRows = 5;
     private static final String gamename = "test";
     public JSONArray getScoreboard() {return this.scoreboard;}
+    //endregion
+    //region Constructor
+    public Menu()
+    {
+        this.gameController = new GameController(0, this);
+        this.gameController.setPaused(true);
+        this.scoreboard = loadJsonArrayFromFile("leaderboard.json");
+    }
+    //endregion
+    //region Public Methods
     public void showRules()
     {
-        String rules = "";
         System.out.printf("These are the Rules:\n%s\n", rules);
     }
-    public GameController getGameController()
+    public void showLeaderboard()
     {
-        return this.gameController;
-    }
-    private void sortLeaderboard(JSONArray data)
-    {
-        boolean changed = false;
-        // dataStructure { "player": String, "score": int, "gameid": long }
-        for(int i = 0; i < data.length(); i++)
-        {
-            changed = false;
-            for(int j = 0; j < data.length()-1; j++)
-            {
-                //System.out.println(data.toString());
-                JSONObject obj0 = data.getJSONObject(j);
-                JSONObject obj1 = data.getJSONObject(j+1);
-                if(obj0.getInt("score") < obj1.getInt("score"))
-                {
-                    int temp = obj0.getInt("score");
-                    obj0.put("score", obj1.getInt("score"));
-                    obj1.put("score", temp);
-                    long ltemp = obj0.getLong("gameid");
-                    obj0.put("gameid", obj1.getLong("gameid"));
-                    obj1.put("gameid", ltemp);
-                    String stemp = obj0.getString("player");
-                    obj0.put("player", obj1.getString("player"));
-                    obj1.put("player", stemp);
-                    changed = true;
-                }
-            }
-            if(!changed) break;
-        }
-    }
-    public void showLeaderboard() throws IOException
-    {
-        // Load LeaderBoard in JSONObject
-
+        // Load LeaderBoard in JSONArray
         JSONArray data = this.scoreboard;
         sortLeaderboard(data);
         for(int i = 0; i < Math.min(Menu.scoreboardRows, data.length()); i++)
@@ -70,71 +43,16 @@ public class Menu {
             System.out.printf("(%d): %s with a score of %d\n", i+1, d.getString("player"), d.getInt("score"));
         }
     }
-    private JSONObject loadJsonObjectFromFile(String filename)
-    {
-        String dataText = loadFileContent(filename, "{}");
-        return new JSONObject(dataText);
-    }
-    private JSONArray loadJsonArrayFromFile(String filename)
-    {
-        String dataText = loadFileContent(filename, "[]");
-        //System.out.println(dataText);
-        return new JSONArray(dataText);
-    }
-    private String loadFileContent(String filename, String ifEmpty)
-    {
-        try
-        {
-            Path path = Paths.get("data/");
-            Path filepath = Paths.get(path+"/"+filename);
-            if(!Files.exists(path)) Files.createDirectory(path);
-            String fp = filepath.toString();
-            File f = new File(fp);
-            // create file an ready it for the json read if it doesnt exists
-            if(!f.exists())
-            {
-                Files.createFile(f.toPath());
-                try {
-                    BufferedWriter writer = new BufferedWriter(new FileWriter(fp));
-                    writer.write(ifEmpty);
-                    writer.close();
-                } catch(IOException e)
-                {
-                    System.out.printf("Could not Create File '%s'!\n", filename);
-                }
-            }
-            InputStream stream = new FileInputStream(fp);
-            byte[] dt = stream.readAllBytes();
-            StringBuilder sb = new StringBuilder();
-            for(int i = 0; i < dt.length; i++)
-            {
-                sb.append((char)dt[i]);
-            }
-            // System.out.println(jsonText);
-            return sb.toString();
-        } catch(IOException e)
-        {
-            System.out.printf("File '%s' could not be opened", filename);
-        }
-        return "";
-    }
-    public boolean loadGamestate() {
+    public void loadGamestate() {
         JSONObject data = loadJsonObjectFromFile("lastGame.json");
         if(data.keySet().isEmpty())
         {
             System.out.println("No game was found new game will be created instead");
             createNewGame();
-            return false;
+            return;
         }
         this.gameController = new GameController(data.getJSONArray("players").length(), this);
         gameController.initialize(data);
-        return true;
-    }
-    public Menu()
-    {
-        this.gameController = new GameController(0, this);
-        this.gameController.setPaused(true);
-        this.scoreboard = loadJsonArrayFromFile("leaderboard.json");
     }
     public void start()
     {
@@ -154,10 +72,85 @@ public class Menu {
         }
         saveLeaderboard();
     }
+    //endregion
+    //region Private Methods
+    private void sortLeaderboard(JSONArray data)
+    {
+        boolean changed;
+        // dataStructure { "player": String, "score": int, "gameid": long }
+        for(int i = 0; i < data.length(); i++)
+        {
+            changed = false;
+            for(int j = 0; j < data.length()-1; j++)
+            {
+                JSONObject obj0 = data.getJSONObject(j);
+                JSONObject obj1 = data.getJSONObject(j+1);
+                if(obj0.getInt("score") < obj1.getInt("score"))
+                {
+                    int temp = obj0.getInt("score");
+                    obj0.put("score", obj1.getInt("score"));
+                    obj1.put("score", temp);
+                    long ltemp = obj0.getLong("gameid");
+                    obj0.put("gameid", obj1.getLong("gameid"));
+                    obj1.put("gameid", ltemp);
+                    String stemp = obj0.getString("player");
+                    obj0.put("player", obj1.getString("player"));
+                    obj1.put("player", stemp);
+                    changed = true;
+                }
+            }
+            if(!changed) break;
+        }
+    }
+    private JSONObject loadJsonObjectFromFile(String filename)
+    {
+        String dataText = loadFileContent(filename, "{}");
+        return new JSONObject(dataText);
+    }
+    private JSONArray loadJsonArrayFromFile(String filename)
+    {
+        String dataText = loadFileContent(filename, "[]");
+        return new JSONArray(dataText);
+    }
+    private String loadFileContent(String filename, String ifEmpty)
+    {
+        try
+        {
+            Path path = Paths.get("data/");
+            Path filepath = Paths.get(path+"/"+filename);
+            if(!Files.exists(path)) Files.createDirectory(path);
+            String fp = filepath.toString();
+            File f = new File(fp);
+            // create file and ready it for the json read if it doesn't exist
+            if(!f.exists())
+            {
+                Files.createFile(f.toPath());
+                try {
+                    BufferedWriter writer = new BufferedWriter(new FileWriter(fp));
+                    writer.write(ifEmpty);
+                    writer.close();
+                } catch(IOException e)
+                {
+                    System.out.printf("Could not Create File '%s'!\n", filename);
+                }
+            }
+            InputStream stream = new FileInputStream(fp);
+            byte[] dt = stream.readAllBytes();
+            StringBuilder sb = new StringBuilder();
+            for (byte b : dt) {
+                sb.append((char) b);
+            }
+            return sb.toString();
+        } catch(IOException e)
+        {
+            System.out.printf("File '%s' could not be opened", filename);
+        }
+        return "";
+    }
     private void saveLeaderboard()
     {
         File f = new File("data/leaderboard.json");
-        if(!f.exists()) try {Files.createFile(f.toPath());} catch(Exception e){}
+        if(!f.exists()) try {Files.createFile(f.toPath());} catch(Exception ignored){}
         try {
             BufferedWriter writer = new BufferedWriter(new FileWriter(f.getPath()));
             writer.write(this.scoreboard.toString());
@@ -170,7 +163,6 @@ public class Menu {
     private void chooseBegin()
     {
         System.out.printf("Hello, to %s\nwhat do you want to do?\n(1) Show Rules\n(2) Show Leaderboard\n(3) Load Game\n(4) New Game\n(5) Exit\n", gamename);
-        Scanner sc = new Scanner(System.in);
         int choice = getChoice(1,5);
         switch(choice)
         {
@@ -290,5 +282,11 @@ public class Menu {
         this.gameController = new GameController(number, this);
         this.gameController.initialize();
         this.gameController.setPaused(false);
+        this.clearScreen(2);
     }
+    private void clearScreen(int i)
+    {
+        for(; i > 0; i--) System.out.print("\n");
+    }
+    //endregion
 }

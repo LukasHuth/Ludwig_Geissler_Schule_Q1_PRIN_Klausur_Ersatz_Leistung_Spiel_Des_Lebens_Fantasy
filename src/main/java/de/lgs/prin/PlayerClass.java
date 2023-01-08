@@ -3,26 +3,26 @@ package de.lgs.prin;
 public enum PlayerClass {
     Apprentice_Wizard,
     Wizard,
-    Advaned_Wizard,
+    Advanced_Wizard,
 
     Apprentice_Blacksmith,
     Blacksmith,
-    Advaned_Blacksmith,
+    Advanced_Blacksmith,
 
     Apprentice_Alchemist,
     Alchemist,
-    Advaned_Alchemist,
+    Advanced_Alchemist,
 
     Apprentice_Soldier,
     Soldier,
-    Advaned_Soldier,
+    Advanced_Soldier,
 
     Apprentice_Ranger,
     Ranger,
-    Advaned_Ranger,
+    Advanced_Ranger,
 
     Apprentice_Preacher,
     Preacher,
-    Advaned_Preacher,
+    Advanced_Preacher,
     NONE
 }
