@@ -76,7 +76,7 @@ public class Field {
     {
         int count = player.getGroupsize();
         count = Math.min(6, count+1);
-        System.out.println(Utils.fNormal.format("You found a kid, who wants to join your group. You now have " + count + " people in your group"));
+        System.out.println(Utils.fSpecial.format("You found a kid, who wants to join your group. You now have " + count + " people in your group"));
         player.setGroupsize(count);
     }
     private void action(Player player)
@@ -99,35 +99,38 @@ public class Field {
     }
     private void actionMonster(Player player)
     {
-        int amount = (int)((this.amount/2)*Math.random());
+        int amount = (int)((this.amount)*Math.max(Math.random(), 0.25));
         String name = this.getRandom(Utils.monsters);
+        // TODO: format a an
         System.out.printf(Utils.fNormal.format("You encountered an %s and it started to attack you\n"), name);
         // Monster
         double r = Math.random();
-        boolean fail = r < 0.5*this.exp(1.25, player.getGroupsize()-1);
+        boolean fail = r > 0.5*this.exp(1.25, player.getGroupsize()-1);
         if(fail) {
             System.out.printf(Utils.fNormal.format("You failed to fight against the %s, you lost %s gold\n"), name, Utils.fGold.format(amount+""));
             player.addMoney(-amount);
         } else
         {
+            amount*=1+((player.getMoneyScale()-1)/2);
             System.out.printf(Utils.fNormal.format("You won your fight against the %s and found %s gold in his stomach\n"), name, Utils.fGold.format(amount+""));
             player.addMoney(amount);
         }
     }
     private void actionMission(Player player)
     {
-        int amount = (int)((this.amount/2)*Math.random());
+        int amount = (int)((this.amount)*Math.max(Math.random(), 0.25));
         // Mission
         String name = this.getRandom(Utils.missions);
         System.out.printf(Utils.fNormal.format("Your adventure group accepts a request from the bulletin board for the quest '%s'\n"), name);
         // Monster
         double r = Math.random();
-        boolean fail = r < 0.5*this.exp(1.25, player.getGroupsize()-1);
+        boolean fail = r > 0.5*this.exp(1.25, player.getGroupsize()-1);
         if(fail) {
             System.out.println(Utils.fNormal.format("You did not complete the quest in the required time"));
             player.addMoney(-amount);
         } else
         {
+            amount*=1+((player.getMoneyScale()-1)/2);
             System.out.printf(Utils.fNormal.format("The client hands over your payment of %s gold\n"), Utils.fGold.format(amount+""));
             player.addMoney(amount);
         }

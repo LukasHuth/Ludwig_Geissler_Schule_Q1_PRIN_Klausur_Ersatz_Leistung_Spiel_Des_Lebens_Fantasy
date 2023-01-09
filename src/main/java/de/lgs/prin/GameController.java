@@ -128,14 +128,15 @@ public class GameController {
             String name = player.getName();
             if(this.playfield.isFinished(player))
             {
-                System.out.printf(Utils.fNormal.format("%s is already finished, moving to the next one\n"), Utils.fInfo.format(name));
+                System.out.printf(Utils.fNormal.format("%s is already finished, moving to the next one\n\n"), Utils.fInfo.format(name));
                 continue;
             }
             System.out.printf(Utils.fNormal.format("It's now the turn of %s!\n"), Utils.fInfo.format(name));
             Random random = new Random();
+            random.setSeed(System.nanoTime());
             if(!this.firstrun)
             {
-                int number = random.nextInt(10)+1;
+                int number = random.nextInt(6)+1;
                 System.out.printf(Utils.fNormal.format("A %s has been rolled!\n"), Utils.fInfo.format(number+""));
                 player.move(number);
             }

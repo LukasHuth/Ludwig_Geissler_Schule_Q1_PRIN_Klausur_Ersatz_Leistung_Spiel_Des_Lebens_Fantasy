@@ -59,9 +59,9 @@ public class Playfield {
     }
     private int rand(int max)
     {
-        return (int)(Math.random()*max);
+        return (int)(Math.max(1.0/3.0, Math.random())*max);
     }
-    public Fieldtype randField() {
+    private Fieldtype randField() {
         int pick;
         while (true) {
             pick = new Random().nextInt(Fieldtype.values().length);
@@ -93,6 +93,8 @@ public class Playfield {
         //position=Math.floor(position);
         if (position<9.0){
             return 9.0-position;
+        } else if (position<19.0) {
+            return 19.0-position;
         } else if (position<24.0) {
             return 24.0-position;
         } else if (position<41.0) {
@@ -107,11 +109,8 @@ public class Playfield {
     public void addField(Field field, double position) {
         playfield.put(position,field);
     }
-    public boolean isFished(Player player){
-        return player.getPosition()>=fieldSize;
-    }
     public boolean isFinished(Player p)
     {
-        return isFished(p);
+        return p.getPosition()>=fieldSize;
     }
 }

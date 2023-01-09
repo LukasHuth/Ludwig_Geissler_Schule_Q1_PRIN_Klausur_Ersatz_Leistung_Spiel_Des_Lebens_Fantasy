@@ -18,12 +18,15 @@ public class Menu {
             The game is playable with at least 2 players.
             After you start the game, you create the players, then the game tells you whose turn it is.
 
-            The game board consists of many adjoining squares, which are triggered. You roll a ten-sided die, and the game moves the figure along the board by the number rolled.
-            The object of the game is to move the figure to the end of all the squares to reach Mount Celestia and have more money than all the other players with your adventure party.\s
+            The game board consists of many adjoining squares, which are triggered. You roll a six-sided dice,
+            and the game moves the figure along the board by the number rolled.
+            The object of the game is to move the figure to the end of all the squares to reach Mount Celestia
+            and have more money than all the other players with your adventure party.
 
             There are several types of fields.
             Red:
-            This square stops any Player if it comes over it during its move, forcing the respective Player to trigger the event. Most of the time, you have to choose between two different paths on these squares.\s
+            This square stops any Player if it comes over it during its move, forcing the respective Player to trigger the event.
+            Most of the time, you have to choose between two different paths on these squares.
             Yellow:
             These are gold fields, on them you get or lose the gold that the field holds for you.
             Blue:
@@ -32,16 +35,19 @@ public class Menu {
             The group field, on this field you will get a member added to your adventure group.
 
             The adventure group
-            At the beginning of the game you are on your own, at some point a red field will allow you to add another person to your party, this party member is just part of your party and can't do anything to it during the game. Once you have reached Mount Celestia, they will give you a small gold bonus.
+            At the beginning of the game you are on your own, at some point a red field will allow you to add
+            another person to your party, this party member is just part of your party and can't do anything to it during the game.
+            Once you have reached Mount Celestia, they will give you a small gold bonus.
 
             Loading or saving a score
-            At the end of a round, the game will ask if you want to pause it at this point. Type b in the command line. Now you are in the pause menu. There you can save the game, continue or quit it. When you quit a game you will also be asked if you want to save the active game state. It is only possible to save one savegame at a time.
+            At the end of a round, the game will ask if you want to pause it at this point.
+            Type b in the command line. Now you are in the pause menu. There you can save the game, continue or quit it.
+            When you quit a game you will also be asked if you want to save the active game state. It is only possible to save one savegame at a time.
             If you want to load the previous save game you have to choose the option "Load Game" in the main menu, then the game will take over again.
             """;
     private final JSONArray scoreboard;
     private boolean run;
     private static final int scoreboardRows = 5;
-    public JSONArray getScoreboard() {return this.scoreboard;}
     //endregion
     //region Constructor
     public Menu()
@@ -52,11 +58,12 @@ public class Menu {
     }
     //endregion
     //region Public Methods
-    public void showRules()
+    public JSONArray getScoreboard() {return this.scoreboard;}
+    private void showRules()
     {
         System.out.printf(Utils.fNormal.format("These are the Rules:\n%s\n"), rules);
     }
-    public void showLeaderboard()
+    private void showLeaderboard()
     {
         // Load LeaderBoard in JSONArray
         JSONArray data = this.scoreboard;
@@ -67,7 +74,7 @@ public class Menu {
             System.out.printf(Utils.fNormal.format("(%d): %s with a score of %d\n"), i+1, d.getString("player"), d.getInt("score"));
         }
     }
-    public void loadGamestate() {
+    private void loadGamestate() {
         JSONObject data = loadJsonObjectFromFile("lastGame.json");
         if(data.keySet().isEmpty())
         {

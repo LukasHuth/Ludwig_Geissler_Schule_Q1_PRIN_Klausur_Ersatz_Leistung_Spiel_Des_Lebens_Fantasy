@@ -77,8 +77,6 @@ public class Player {
     }
 
     //constructor
-    public Player () {
-    }
 
     public Player (String name, GameController gameController) {
         this.moneyScale = 1;
