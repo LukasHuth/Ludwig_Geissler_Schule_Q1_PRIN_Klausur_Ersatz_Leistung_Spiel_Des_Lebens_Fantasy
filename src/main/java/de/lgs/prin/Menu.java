@@ -12,7 +12,6 @@ import java.util.Scanner;
 public class Menu {
     //region Attributes
     private GameController gameController;
-    // TODO: Rules
     private static final String rules = """
             Game instructions
             The game is playable with at least 2 players.
@@ -44,6 +43,24 @@ public class Menu {
             Type b in the command line. Now you are in the pause menu. There you can save the game, continue or quit it.
             When you quit a game you will also be asked if you want to save the active game state. It is only possible to save one savegame at a time.
             If you want to load the previous save game you have to choose the option "Load Game" in the main menu, then the game will take over again.
+            The menu
+            1 shows the rules of the game
+            2 shows the best players of the past games (is empty if you have never played a game before).
+            3 starts the saved, if it is available
+            4 creates a new game
+            5 close the game
+                        
+            The pause menu
+            1 shows the rules of the game
+            2 shows the best players of the past games (is empty if you have never played a game before).
+            3 Continue game
+            4 Save game
+            5 cancel game and start new game
+            6 close game
+                        
+            General controls
+            If the game gives you a choice, enter the number of your choice in the command line and confirm with Enter.
+            If the game does not present you with a choice at the end of an output, just confirm with Enter to continue.
             """;
     private final JSONArray scoreboard;
     private boolean run;

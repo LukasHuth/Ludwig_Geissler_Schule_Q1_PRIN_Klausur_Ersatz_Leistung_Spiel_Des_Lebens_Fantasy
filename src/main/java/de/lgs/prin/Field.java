@@ -1,8 +1,6 @@
 package de.lgs.prin;
 
-import java.util.ArrayList;
-import java.util.Random;
-import java.util.Scanner;
+import java.util.*;
 
 public class Field {
     //Attribite
@@ -102,7 +100,9 @@ public class Field {
         int amount = (int)((this.amount)*Math.max(Math.random(), 0.25));
         String name = this.getRandom(Utils.monsters);
         // TODO: format a an
-        System.out.printf(Utils.fNormal.format("You encountered an %s and it started to attack you\n"), name);
+        System.out.printf(Utils.fNormal.format("You encountered %s %s and it started to attack you\n"),
+                (List.of(new char[]{'a', 'o', 'i', 'e', 'u'}).contains(name.charAt(0))) ? "an" : "a", // an wenn selbstlaut am anfang, sonst a
+                name);
         // Monster
         double r = Math.random();
         boolean fail = r > 0.5*this.exp(1.25, player.getGroupsize()-1);
@@ -248,6 +248,7 @@ public class Field {
         int amount = Field.finishMoney/player.getGameController().getPlayersFinished();
         player.addMoney(amount);
         System.out.println(Utils.fNormal.format("You have reached mount celestia"));
+        // TODO: for later after finishing, ask player to accept n gold but then go to hell
     }
 
 }
