@@ -12,11 +12,35 @@ import java.util.Scanner;
 public class Menu {
     //region Attributes
     private GameController gameController;
-    private static final String rules = "";
+    // TODO: Rules
+    private static final String rules = """
+            Game instructions
+            The game is playable with at least 2 players.
+            After you start the game, you create the players, then the game tells you whose turn it is.
+
+            The game board consists of many adjoining squares, which are triggered. You roll a ten-sided die, and the game moves the figure along the board by the number rolled.
+            The object of the game is to move the figure to the end of all the squares to reach Mount Celestia and have more money than all the other players with your adventure party.\s
+
+            There are several types of fields.
+            Red:
+            This square stops any Player if it comes over it during its move, forcing the respective Player to trigger the event. Most of the time, you have to choose between two different paths on these squares.\s
+            Yellow:
+            These are gold fields, on them you get or lose the gold that the field holds for you.
+            Blue:
+            This field is an action field, good or bad things can happen here.
+            Pink:
+            The group field, on this field you will get a member added to your adventure group.
+
+            The adventure group
+            At the beginning of the game you are on your own, at some point a red field will allow you to add another person to your party, this party member is just part of your party and can't do anything to it during the game. Once you have reached Mount Celestia, they will give you a small gold bonus.
+
+            Loading or saving a score
+            At the end of a round, the game will ask if you want to pause it at this point. Type b in the command line. Now you are in the pause menu. There you can save the game, continue or quit it. When you quit a game you will also be asked if you want to save the active game state. It is only possible to save one savegame at a time.
+            If you want to load the previous save game you have to choose the option "Load Game" in the main menu, then the game will take over again.
+            """;
     private final JSONArray scoreboard;
     private boolean run;
     private static final int scoreboardRows = 5;
-    private static final String gamename = "test";
     public JSONArray getScoreboard() {return this.scoreboard;}
     //endregion
     //region Constructor
@@ -30,7 +54,7 @@ public class Menu {
     //region Public Methods
     public void showRules()
     {
-        System.out.printf("These are the Rules:\n%s\n", rules);
+        System.out.printf(Utils.fNormal.format("These are the Rules:\n%s\n"), rules);
     }
     public void showLeaderboard()
     {
@@ -40,14 +64,14 @@ public class Menu {
         for(int i = 0; i < Math.min(Menu.scoreboardRows, data.length()); i++)
         {
             JSONObject d = data.getJSONObject(i);
-            System.out.printf("(%d): %s with a score of %d\n", i+1, d.getString("player"), d.getInt("score"));
+            System.out.printf(Utils.fNormal.format("(%d): %s with a score of %d\n"), i+1, d.getString("player"), d.getInt("score"));
         }
     }
     public void loadGamestate() {
         JSONObject data = loadJsonObjectFromFile("lastGame.json");
         if(data.keySet().isEmpty())
         {
-            System.out.println("No game was found new game will be created instead");
+            System.out.println(Utils.fNormal.format("No game was found new game will be created instead"));
             createNewGame();
             return;
         }
@@ -68,6 +92,19 @@ public class Menu {
             while(!this.gameController.isPaused())
             {
                 this.gameController.run();
+                if(this.gameController.isFinished())
+                {
+                    this.gameController.sortPlayers();
+                    Player f = this.gameController.getPlayer(0);
+                    Player s = this.gameController.getPlayer(1);
+                    System.out.printf(Utils.fNormal.format("The game is finished.\n%s won with %s gold, this are %s more gold than the gold of %s who is on the second place.\n"),
+                            Utils.fInfo.format(f.getName()),
+                            Utils.fGold.format(f.getMoney()+""),
+                            Utils.fGold.format((f.getMoney()-s.getMoney())+""),
+                            Utils.fInfo.format(s.getName()));
+                    this.gameController.setPaused(true);
+                    continue;
+                }
             }
         }
         saveLeaderboard();
@@ -131,7 +168,7 @@ public class Menu {
                     writer.close();
                 } catch(IOException e)
                 {
-                    System.out.printf("Could not Create File '%s'!\n", filename);
+                    System.out.printf(Utils.fError.format("Could not Create File '%s'!\n"), filename);
                 }
             }
             InputStream stream = new FileInputStream(fp);
@@ -143,7 +180,7 @@ public class Menu {
             return sb.toString();
         } catch(IOException e)
         {
-            System.out.printf("File '%s' could not be opened", filename);
+            System.out.printf(Utils.fError.format("File '%s' could not be opened"), filename);
         }
         return "";
     }
@@ -157,12 +194,12 @@ public class Menu {
             writer.close();
         } catch(IOException e)
         {
-            System.out.println("Could not save the leaderboard!");
+            System.out.println(Utils.fError.format("Could not save the leaderboard!"));
         }
     }
     private void chooseBegin()
     {
-        System.out.printf("Hello, to %s\nwhat do you want to do?\n(1) Show Rules\n(2) Show Leaderboard\n(3) Load Game\n(4) New Game\n(5) Exit\n", gamename);
+        System.out.printf(Utils.fNormal.format("Hello, to %s\nwhat do you want to do?\n(1) Show Rules\n(2) Show Leaderboard\n(3) Load Game\n(4) New Game\n(5) Exit\n"), Utils.gamename);
         int choice = getChoice(1,5);
         switch(choice)
         {
@@ -194,7 +231,7 @@ public class Menu {
         } catch(Exception ignored) {}
         while(choice < min || choice > max)
         {
-            System.out.println("Wrong input please input a valid key");
+            System.out.println(Utils.fError.format("Wrong input please input a valid key"));
             try {
                 choice = Integer.parseInt(sc.nextLine());
             } catch(Exception ignored) {}
@@ -203,7 +240,7 @@ public class Menu {
     }
     private void chooseMiddle()
     {
-        System.out.printf("Hello, to %s\nwhat do you want to do?\n(1) Show Rules\n(2) Show Leaderboard\n(3) Continue\n(4) Save Current Game\n(5) New Game\n(6) Exit\n", gamename);
+        System.out.printf(Utils.fNormal.format("Hello, to %s\nwhat do you want to do?\n(1) Show Rules\n(2) Show Leaderboard\n(3) Continue\n(4) Save Current Game\n(5) New Game\n(6) Exit\n"), Utils.gamename);
         int choice = getChoice(1,6);
         switch(choice)
         {
@@ -226,7 +263,7 @@ public class Menu {
                     createNewGame();
                     this.gameController.setPaused(false);
                 } else
-                    System.out.println("Cancled");
+                    System.out.println(Utils.fNormal.format("Cancled"));
                 break;
             case 6:
                 boolean save = question("Do you want to save the game?", true);
@@ -238,14 +275,14 @@ public class Menu {
     }
     private boolean question(String q, boolean def)
     {
-        System.out.println(q + " " + ((def) ? "(Y|n)" : "(y|N)"));
+        System.out.println(Utils.fNormal.format(q + " " + ((def) ? "(Y|n)" : "(y|N)")));
         Scanner sc = new Scanner(System.in);
         boolean a = sc.nextLine().equalsIgnoreCase((def) ? "n" : "y");
         return def != a;
     }
     private void chooseEnd()
     {
-        System.out.printf("Hello, to %s\nwhat do you want to do?\n(1) Show Rules\n(2) Show Leaderboard\n(3) New Game\n(4) Exit\n", gamename);
+        System.out.printf(Utils.fNormal.format("Hello, to %s\nwhat do you want to do?\n(1) Show Rules\n(2) Show Leaderboard\n(3) New Game\n(4) Exit\n"), Utils.gamename);
         int choice = getChoice(1,4);
         switch(choice)
         {
@@ -267,16 +304,16 @@ public class Menu {
     }
     private void createNewGame()
     {
-        System.out.println("With how many Players are you playing?");
+        System.out.println(Utils.fNormal.format("With how many Players are you playing?"));
         Scanner scanner = new Scanner(System.in);
         int number  = -1;
-        while(number < 1)
+        while(number < 2)
         {
             try {
                 number = Integer.parseInt(scanner.nextLine());
             } catch(Exception e)
             {
-                System.out.println("Please enter a number");
+                System.out.println(Utils.fError.format("Please enter a number"));
             }
         }
         this.gameController = new GameController(number, this);

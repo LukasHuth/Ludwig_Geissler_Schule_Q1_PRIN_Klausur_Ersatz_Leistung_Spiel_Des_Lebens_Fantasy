@@ -90,6 +90,7 @@ public class Player {
     //Methoden
     public void move(double steps) {
         double n = this.gameController.getPlayfield().nextPause(this.position);
+        //System.out.printf("move: %.1f, %.1f, %.1f\n", n, this.position, steps);
         if (n < steps) {
             this.position += n;
             return;

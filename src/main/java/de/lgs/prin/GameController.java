@@ -17,16 +17,16 @@ public class GameController {
     private final ArrayList<Player> players;
     private final int playerCount;
     private int playersFinished;
-    private static int finishedPlayers = 0;
-    public static int getFinishedPlayers() {return finishedPlayers;}
     private long gameid;
     private Menu menu;
+    private ArrayList<String> playerNames;
     public long getGameid() {return this.gameid;}
     public void setPaused(boolean p) {this.paused = p;}
     public int getPlayerCount() {return this.playerCount;}
     private boolean firstrun;
     public GameController(int playerCount, Menu menu)
     {
+        this.playerNames = new ArrayList<>();
         this.firstrun = true;
         this.menu = menu;
         this.gameid = System.currentTimeMillis();
@@ -36,7 +36,6 @@ public class GameController {
         this.finished = false;
         this.players = new ArrayList<>();
         this.playersFinished = 0;
-        GameController.finishedPlayers = this.playersFinished;
     }
     // initialisiert eine Schleife die so oft läuft wie es Spieler gibt, um die Spieler zu erstellen
     private void createPlayers(int playerCount)
@@ -49,9 +48,22 @@ public class GameController {
     private void createPlayer()
     {
         Scanner scanner = new Scanner(System.in);
-        System.out.println("What is your name?");
-        String name = scanner.nextLine();
+        System.out.println(Utils.fNormal.format("What is your name?"));
+        String name = "";
+        while(name.equals("") || this.playerNames.contains(name))
+        {
+            name = scanner.nextLine();
+            if(name.equals(""))
+            {
+                System.out.println(Utils.fNormal.format("Please enter a name!"));
+            }
+            else if(this.playerNames.contains(name))
+            {
+                System.out.println(Utils.fNormal.format("This name is already taken!"));
+            }
+        }
         addPlayer(new Player(name, this));
+        this.playerNames.add(name);
     }
     // erstellt das spiel mit spielfeld
     public void initialize()
@@ -59,6 +71,7 @@ public class GameController {
         // erstellt die spieler
         createPlayers(this.playerCount);
         this.playfield.generateMap();
+
     }
     // lädt das spiel aus dem data Objekt mit einem noch nicht definiertem Datentypen
     public void initialize(JSONObject data)
@@ -71,10 +84,11 @@ public class GameController {
             JSONObject po = data.getJSONArray("players").getJSONObject(i);
             Player p = new Player(po.getString("name"), this);
             //System.out.printf("Loading player '%s'\n", p.getName());
-            p.setGroupsize(po.getInt("groupSize"));
+            p.setGroupsize(po.getInt("groupsize"));
             p.setPosition(po.getDouble("position"));
             //System.out.printf("Position: %f\n", p.getPosition());
             p.setMoney(po.getInt("money"));
+            p.setMoneyScale(po.getDouble("moneyScale"));
             p.setPlayerClass(PlayerClass.valueOf(po.getString("playerClass")));
             addPlayer(p);
         }
@@ -83,14 +97,12 @@ public class GameController {
         HashMap<Double, Field> flds = new HashMap<>();
         for(int i = 0; i < fieldCount; i++)
         {
-            // Field laden in field
-            // Field position laden in position
-            Field field = new Field(Fieldtype.NONE, 0, this.playfield); // placeholder bis das laden des feldes implementiert ist
-            double position = 0.0;
-            flds.put((double)i, field);
+            JSONObject fo = fields.getJSONObject(i);
+            Field field = new Field(Fieldtype.valueOf(fo.getString("type")), fo.getInt("amount"));
+            flds.put(fo.getDouble("position"), field);
         }
-        this.playfield.generateMap(); // just for debug till the field load is finished
-        // this.playfield.setPlayfield(flds); // commented out till i implemented the field load method
+        // this.playfield.generateMap(); // just for debug till the field load is finished
+        this.playfield.setPlayfield(flds); // commented out till i implemented the field load method
     }
     private void executeField(Player player)
     {
@@ -104,8 +116,8 @@ public class GameController {
     {
         if(this.firstrun)
         {
-            System.out.println("Welcome to a world full of magic and fantasy, a world that has long been forgotten and you are the only ones who know of its existence.\n" +
-                    "Now find out who will be the first to start writing the path of his life.");
+            System.out.println(Utils.fSpecial.format("Welcome to a world full of magic and fantasy, a world that has long been forgotten and you are the only ones who know of its existence.\n" +
+                    "Now find out who will be the first to start writing the path of his life."));
             Collections.shuffle(this.players);
         }
         //System.out.println("Gameid: "+ this.gameid);
@@ -116,37 +128,37 @@ public class GameController {
             String name = player.getName();
             if(this.playfield.isFinished(player))
             {
-                System.out.printf("%s is already finished, moving to the next one\n", name);
+                System.out.printf(Utils.fNormal.format("%s is already finished, moving to the next one\n"), Utils.fInfo.format(name));
                 continue;
             }
-            System.out.printf("It's now the turn of %s!\n", name);
+            System.out.printf(Utils.fNormal.format("It's now the turn of %s!\n"), Utils.fInfo.format(name));
             Random random = new Random();
             if(!this.firstrun)
             {
                 int number = random.nextInt(10)+1;
-                System.out.printf("A %d has been rolled!\n", number);
+                System.out.printf(Utils.fNormal.format("A %s has been rolled!\n"), Utils.fInfo.format(number+""));
                 player.move(number);
             }
-            if(this.playfield.isFinished(player))
-            {
-                this.playersFinished++;
-                GameController.finishedPlayers = this.playersFinished;
-            }
+            if(this.playfield.isFinished(player)) this.playersFinished++;
             executeField(player);
-            System.out.printf("The turn of %s is now finished\n", name);
+            System.out.printf(Utils.fNormal.format("The turn of %s is now finished\n"), Utils.fInfo.format(name));
+            // System.out.printf("%s is on field %.0f\n", name, player.getPosition());
             scanner.nextLine();
         }
         // Spieler fragen ob er Pausieren möchte oder weiter spielen möchte (c und enter ist weiter und p ist pause) bei falscher eingabe wird die frage wiederhohlt
         //region
-        System.out.println("Are you ready or do you want to take a break? (C|b) (c=continue) (b=break)");
-        String answer;
-        String[] answers = {"b", "c", ""};
-        while(Arrays.stream(answers).noneMatch((answer = scanner.nextLine().toLowerCase())::equals))
+        if(!this.firstrun)
         {
-            System.out.println("You did not enter the right key!");
-            System.out.println("Are you ready or do you want to take a break? (C|b) (c=continue) (b=break)");
+            System.out.println(Utils.fNormal.format("Are you ready or do you want to take a break? (C|b) (c=continue) (b=break)"));
+            String answer;
+            String[] answers = {"b", "c", ""};
+            while(Arrays.stream(answers).noneMatch((answer = scanner.nextLine().toLowerCase())::equals))
+            {
+                System.out.println(Utils.fError.format("You did not enter the right key!"));
+                System.out.println(Utils.fNormal.format("Are you ready or do you want to take a break? (C|b) (c=continue) (b=break)"));
+            }
+            this.paused = answer.equalsIgnoreCase("b");
         }
-        this.paused = answer.equalsIgnoreCase("b");
         //endregion
         this.finished = true;
         for(Player p : this.players)
@@ -155,6 +167,7 @@ public class GameController {
                 this.finished = false;
             }
         }
+        if(this.finished) this.paused = true;
         if(this.paused)
         {
             for(Player p : this.players)
@@ -198,18 +211,23 @@ public class GameController {
         for(Player p : this.players)
         {
             //System.out.println(this.players.size() + this.players.get(0).getName());
-            JSONObject playerObject = new JSONObject();
-            playerObject.put("name", p.getName());
-            playerObject.put("position", p.getPosition());
-            playerObject.put("money", p.getMoney());
-            playerObject.put("groupSize", p.getGroupsize());
-            playerObject.put("playerClass", p.getPlayerClass().name());
+            JSONObject playerObject = new JSONObject(p);
+            playerObject.remove("gameController");
             //PlayerClass c = PlayerClass.valueOf("Advaned_Blacksmith");
             playerArray.put(playerObject);
         }
         jo.put("players", playerArray);
         //System.out.println(jo.toString());
         JSONArray fields = new JSONArray();
+        for(Double key : this.playfield.getPlayfield().keySet())
+        {
+            Field f = this.playfield.getField(key);
+            JSONObject field = new JSONObject();
+            field.put("position", key);
+            field.put("type", f.gettype().name());
+            field.put("amount", f.getamount());
+            fields.put(field);
+        }
         jo.put("fields", fields);
         jo.put("gameid", this.gameid);
         File f = new File("data/lastGame.json");
@@ -220,7 +238,17 @@ public class GameController {
             writer.close();
         } catch(IOException e)
         {
-            System.out.println("Could not save the game!");
+            System.out.println(Utils.fError.format("Could not save the game!"));
+        }
+    }
+    public void sortPlayers()
+    {
+        this.players.sort(new PlayerComparator());
+    }
+    private static class PlayerComparator implements Comparator<Player> {
+        @Override
+        public int compare(Player p0, Player p1){
+            return p1.getMoney()-p0.getMoney();
         }
     }
 }
